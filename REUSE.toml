@@ -1,0 +1,25 @@
+version = 1
+SPDX-PackageName = "routeprint"
+SPDX-PackageSupplier = "Menion"
+SPDX-PackageDownloadLocation = "https://github.com/menion/routeprint"
+
+# Default: code and everything not matched below. Last matching annotation wins.
+[[annotations]]
+path = "**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Menion"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Documentation and own text content.
+[[annotations]]
+path = ["docs/**", "README.md"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Menion"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Add with LICENSES/CC-BY-SA-4.0.txt when data files derived from Google TIM API figures exist:
+# [[annotations]]
+# path = "public/data/**/tim-*.json"
+# precedence = "aggregate"
+# SPDX-FileCopyrightText = ["2026 Menion", "Google LLC"]
+# SPDX-License-Identifier = "CC-BY-SA-4.0"
