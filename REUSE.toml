@@ -12,14 +12,32 @@ SPDX-License-Identifier = "Apache-2.0"
 
 # Documentation and own text content.
 [[annotations]]
-path = ["docs/**", "README.md"]
+path = ["docs/**", "**/README.md", "content/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Menion"
 SPDX-License-Identifier = "CC-BY-4.0"
 
-# Add with LICENSES/CC-BY-SA-4.0.txt when data files derived from Google TIM API figures exist:
+# Enable with the first data build (see docs/architecture.md, "Reference data"); verify each
+# source's licence and SPDX id at that point.
+#
+# Route files: Google TIM API figures (CC BY-SA 4.0) + Teoh et al. distance statistics (CC BY 4.0).
+# Needs LICENSES/CC-BY-SA-4.0.txt.
 # [[annotations]]
-# path = "public/data/**/tim-*.json"
-# precedence = "aggregate"
-# SPDX-FileCopyrightText = ["2026 Menion", "Google LLC"]
-# SPDX-License-Identifier = "CC-BY-SA-4.0"
+# path = "public/data/**/routes/*.json"
+# precedence = "override"
+# SPDX-FileCopyrightText = ["2026 Menion", "Google LLC", "Teoh et al."]
+# SPDX-License-Identifier = "CC-BY-SA-4.0 AND CC-BY-4.0"
+#
+# EEA fuel-burn tables: EEA reuse policy, attribution required.
+# [[annotations]]
+# path = "public/data/**/aircraft.json"
+# precedence = "override"
+# SPDX-FileCopyrightText = ["2026 Menion", "European Environment Agency"]
+# SPDX-License-Identifier = "CC-BY-4.0"
+#
+# OurAirports: public domain.
+# [[annotations]]
+# path = ["public/data/**/airports.json", "public/data/**/coords.json"]
+# precedence = "override"
+# SPDX-FileCopyrightText = "OurAirports contributors"
+# SPDX-License-Identifier = "CC0-1.0"

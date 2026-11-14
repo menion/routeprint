@@ -2,6 +2,7 @@
 
 Source of the clickable UI prototype (landing page + planner, desktop and mobile, light and dark),
 built as a Claude Design canvas from [../docs/prototype-prompt.md](../docs/prototype-prompt.md).
+
 Mock data only; decisions it led to are recorded in [../docs/design.md](../docs/design.md).
 
 | Path | Content |
@@ -15,5 +16,7 @@ Mock data only; decisions it led to are recorded in [../docs/design.md](../docs/
   `DCLogic`) and only run inside the canvas; they are a reference, not production code.
 - In the canvas the stylesheet is loaded from an uploaded asset (`/_blob/…` in each frame's
   `<head>`); this folder's `routeprint.css` is the same file.
+- Inter is loaded from Google Fonts in the canvas only. Do not port that link: production
+  self-hosts the font or uses the system stack, so "No tracking" holds (design.md D7).
 - Values marked "example" in the UI (stop factor, per-aircraft factors, take-off/landing split)
   are placeholders, not sourced data.

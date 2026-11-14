@@ -3,12 +3,13 @@
 Transparent travel carbon footprint calculator: every number is traced to a cited source. Flights
 come first; rail, road and a map-based trip planner will follow.
 
-**Status:** design phase, no code yet.
+**Status:** design phase; a clickable UI prototype exists in [prototype/](prototype/README.md), no
+production code yet.
 
 ## Why
 
-Flight footprint calculators disagree by a factor of 2.5 or more for the same trip, mostly because
-of hidden assumptions about non-CO2 effects, distance and allocation. Routeprint shows the range,
+Flight footprint calculators disagree by a factor of about 2.5 for the same trip, mostly because of
+hidden assumptions about non-CO2 effects, distance and allocation. Routeprint shows the range,
 puts those assumptions on the surface as switchable, cited parameters, and explains every step of
 the calculation. No offsets, no affiliate links.
 

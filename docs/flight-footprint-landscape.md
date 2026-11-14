@@ -1,6 +1,9 @@
 # Flight carbon footprint calculators — landscape review
 
-Survey date: 2026-11-05. Owner: Menion. Project: Routeprint.
+A review of existing flight-footprint calculators, why their numbers diverge, and where Routeprint
+fits.
+
+Survey date: 2026-11-05, updated 2026-11-14. Owner: Menion. Project: Routeprint.
 
 **Verdict:** no existing site combines trustworthy sourcing, exposed assumptions and decision-oriented
 usability. The best data foundation (Google TIM) has a deliberately minimal UI and omits non-CO2
@@ -24,15 +27,16 @@ convenient. That alone costs them credibility with a sceptical user.
 ### Institutional / industry baselines
 
 - **ICAO Carbon Emissions Calculator (ICEC)** — the UN reference, CO2 only, no non-CO2 effects.
-  **Currently offline.** `applications.icao.int/icec` serves a maintenance notice saying it will
-  resume "by the end of February 2026" — still down on 2026-11-05. The most-cited neutral baseline
-  is simply not available right now.
+  Moved, not down: the old `applications.icao.int/icec` still shows a maintenance notice, but ICEC
+  2026 (v6.x, FAQ v6.1 dated September 2026) runs at `icec.icao.int` with passenger and freighter
+  calculators and an API (checked 2026-11-14). A candidate CO2-only cross-check for Routeprint.
 - **IATA CO2 Connect** — the only one sourcing fuel burn and load factors directly from airlines,
   built on IATA RP 1726. Conflict of interest (airline trade body) and limited public documentation.
 - **[EU Flight Emissions Label](https://www.flightemissions.eu/en)** (Regulation (EU) 2024/3170) —
   the best data provenance of anything here: real reported airline performance, actual fuel burn,
   actual passenger/cargo load, actual SAF purchases, EN ISO 14083. But it is voluntary and airline
-  opt-in (Air France-KLM first mover, July 2025), and it is a label embedded in booking flows, not
+  opt-in (Air France-KLM was first to sign a preparatory cooperation memorandum with EASA, 11 July
+  2025), and it is a label embedded in booking flows, not
   a public calculator. Worth tracking as a future data source, not as a competitor.
 
 ### Google Travel Impact Model — the strongest free option
@@ -45,7 +49,8 @@ convenient. That alone costs them credibility with a sceptical user.
   factors, country-level fallback, +5.2% global default over great-circle.
 - ISO 14083 lower heating value 43.1 MJ/kg, CORSIA carbon intensity → 3.1894 kg CO2e/kg TTW,
   0.6465 WTT, 3.8359 well-to-wake.
-- CC BY-SA 4.0, public API, governance by an independent advisory committee (ICCT + Google).
+- Repository and methodology CC BY 4.0, API figures CC BY-SA 4.0; public API; governance by an
+  independent advisory committee (ICCT + Google).
 - EASA Flight Emissions Labels override TIM estimates where they exist.
 - **Omits contrails, NOx and short-lived climate pollutants from the headline CO2e.** Contrails
   appear only as coarse qualitative buckets inside Google Flights.
@@ -111,16 +116,19 @@ Nobody currently does these:
 2. **Decision-oriented, not accounting-oriented.** Rank what actually changes the answer: cabin
    class, aircraft generation, direct vs connecting, airline load factor. atmosfair half-does this,
    behind an offset funnel.
-3. **No offsets, no donations, no sales.** The credibility differentiator.
+3. **No offsets, no ads, no sales; individual support only.** The credibility differentiator
+   (see design.md, "Support and funding").
 4. **Every factor cited inline**, linked to the primary source, versioned.
 5. **Mode comparison** (plane vs train vs car) with the same rigour — currently only
    TravelAndClimate.org, which is clunky and Sweden-centric.
 
 ### Suggested foundation
 
-- **Base fuel burn and distance:** Google TIM. Open methodology, CC BY-SA 4.0, free API,
-  aircraft-specific, ICCT-governed. Do not re-derive EEA Tier 3 fuel burn by hand.
-  Licence: TIM repository is CC BY 4.0; TIM API figures are CC BY-SA 4.0 (share-alike).
+Superseded in part by [architecture.md](architecture.md) section 4: Routeprint runs its own EEA Tier
+3 engine (needed for the step-by-step trace), and Google TIM is the comparison and CI cross-check.
+
+- **Google TIM as reference:** open methodology, free API, aircraft-specific, ICCT-governed.
+  Licence: repository CC BY 4.0; API figures CC BY-SA 4.0 (share-alike).
 - **Non-CO2 layer:** own, parameterised, citing Lee et al. 2021 and Teoh et al. 2024, defaulting to
   the UK Government 1.7 central estimate.
 - **Scope extras** (luggage, in-flight services, airport/aircraft LCA): follow ATP-DEC's published

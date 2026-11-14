@@ -1,7 +1,9 @@
 # Routeprint — UI prototype prompt
 
-Prompt for a design tool or design skill to produce the first clickable UI prototype. Copy
-everything below the line. Background: [design.md](design.md).
+Historical brief that produced the first clickable UI prototype (2026-11-14).
+
+Where it differs from [design.md](design.md), design.md wins: D6 chose variant B, D1 made one way
+the default, D4 shortened the switch labels. To reuse it, copy everything below the line.
 
 ---
 

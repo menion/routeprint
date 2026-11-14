@@ -3,7 +3,7 @@
 A transparent travel-footprint calculator whose every number traces back to a cited source,
 starting with flights and built to grow into rail, road and a map-based trip planner.
 
-Status: draft for discussion, 2026-11-05. Owner: Menion. Background:
+Status: draft, updated 2026-11-14 after the docs review. Owner: Menion. Background:
 [flight-footprint-landscape.md](flight-footprint-landscape.md). UX: [design.md](design.md).
 
 ## Principles
@@ -13,7 +13,7 @@ Status: draft for discussion, 2026-11-05. Owner: Menion. Background:
 | Every number is traceable | The engine returns a calculation trace (each step, value, unit, source id), not just a total. |
 | Methodology is data, not code | Factors live in versioned, cited parameter files; code only applies them. |
 | Assumptions are visible and switchable | Contested choices (non-CO2 multiplier, distance correction, allocation) are named parameters with alternative values, each cited. |
-| Reproducible | A result URL pins the methodology version; same input and version always give the same output. |
+| Reproducible | A result URL pins the methodology and data versions. Every engine behaviour that changes an output belongs to the methodology version, so the same input and versions always give the same output. |
 | No commercial bias | No offsets, no affiliate links, no tracking that sells data. Funded by individual support only (GitHub Sponsors); no company sponsorship. |
 | Private and cheap to run | Calculation runs client-side; v1 needs no backend and no accounts. |
 | Mode-agnostic core | A trip is a list of legs; a leg has a mode. Flight is the first mode, not the only one. |
@@ -59,30 +59,41 @@ Initial flight parameters (v1):
 |---|---|---|---|
 | Fuel → CO2 (TTW) | 3.1894 kg/kg | — | ISO 14083 LHV × CORSIA carbon intensity (as used by TIM) |
 | Fuel → CO2e (WTT) | 0.6465 kg/kg | — | CORSIA LCA (as used by TIM) |
-| Distance correction | route/country factor, else 1.052 | great-circle (1.0) | Teoh et al., ADS-B data (via TIM) |
-| Non-CO2 multiplier | **1.7** | 1.0 (CO2 only), 3.0 (high) | UK Government; Lee et al. 2021; Teoh et al. 2024 |
-| Cabin class weights | per aircraft seat map where known, else defaults | — | TIM / IATA RP 1726 (to verify) |
-| Load factor, cargo share | regional averages | — | ICAO / EEA (to verify) |
+| Great-circle distance | haversine, mean Earth radius 6,371.0088 km | — | IUGG mean radius; formula pinned per methodology version |
+| Distance correction | route/country factor, else 1.052 | great-circle (1.0) | Teoh et al., ADS-B flight tracks (Zenodo record 8369564) |
+| Non-CO2 multiplier | **1.7** | 1.0 (CO2 only: excludes non-CO2), 3.0 (high) | 1.7: UK Government. 3.0: Lee et al. 2021, net aviation ERF ÷ CO2 ERF (100.9 / 34.3 ≈ 2.9). Teoh et al. 2024 argues for lower contrail values |
+| Default aircraft per distance band | one reference type per band (to define, e.g. A320neo family short-haul, B787-9 long-haul) | — | Own documented choice; result cross-checked against Google TIM (section 4) |
+| Seats per aircraft and cabin | typical two-class layout per type | — | Manufacturer typical layouts, cited per type |
+| Cabin class weights | seat-area ratio per cabin class | — | Google TIM documented class factors / IATA RP 1726 (to verify) |
+| Load factor | 84.5 % global default; published regional averages where available | — | ICAO / IATA published averages; US: BTS T-100 (public domain); 84.5 % default as used by Google TIM (FRED) |
+| Cargo share | cargo mass fraction per route type | — | BTS-derived, as Google TIM does (to verify) |
 
 The non-CO2 default is provisional and will be revisited during the methodology work (see A6).
 
 ### 2. Calculation engine
 
 - Pure library: `calculate(trip, methodologyVersion) -> Result`. No I/O, no network, no UI.
-- `Result` = totals per scope layer + `trace[]`. Scope layers, each switchable:
+- `Result` = totals per scope layer + `trace[]`. Layers are reported separately; in v1 only the
+  non-CO2 assumption is switchable (`nonco2` in the URL):
   1. Fuel combustion (TTW CO2)
   2. Fuel production (WTT)
   3. Non-CO2 effects (contrails, NOx, H2O)
   4. Life cycle: aircraft manufacture, airport infrastructure, in-flight services, luggage
      (phase 2)
-- Trip model: `Trip { legs: Leg[], passengers, cabin }`, `Leg { mode, from, to, via?, vehicle? }`.
-  Flight legs carry optional aircraft type and airline; missing values fall back to documented
-  defaults, and the fallback itself appears in the trace.
+- Trip model: `Trip { legs: Leg[], passengers, cabin }`, `Leg { mode, from, to, vehicle? }`. A
+  stop is always two legs. Flight legs carry an optional aircraft type; missing values fall back
+  to documented defaults, and the fallback itself appears in the trace. No airline input in v1:
+  no open dataset makes the result depend on it.
 - Flight fuel = LTO (take-off and landing, fixed per flight per aircraft type) + CCD (climb, cruise,
   descent, per distance band, interpolated), following EEA Tier 3. Both are separate trace steps,
   so the short-flight effect is visible in the explain view.
-- Aircraft: an optional aircraft type per leg; without it, the typical fleet mix for the route
-  (TIM snapshot), else a documented default per distance band. The choice is a trace step.
+- Aircraft: an optional aircraft type per leg; without it, the documented default aircraft for the
+  distance band. The choice is a trace step. Google TIM's typical figure for the route is shown
+  next to the result as an independent comparison, never used as input (section 4).
+- Engine behaviour that affects outputs (distance formula, interpolation, fallback order,
+  rounding) belongs to the methodology version: a change that alters any output ships as a new
+  `m`, older versions keep their own code path, and CI holds exact expected outputs per retained
+  version.
 - Ranges: the engine evaluates low / default / high parameter sets in one pass so the UI can show
   a range without a second call.
 - Runs in the browser; the same package can run server-side later (API, batch validation).
@@ -93,9 +104,15 @@ The non-CO2 default is provisional and will be revisited during the methodology 
 |---|---|---|
 | OurAirports | Airport coordinates, IATA/ICAO codes, names | Public domain |
 | EEA/EMEP Guidebook 2023, 1.A.3.a Aviation annex | Fuel burn per aircraft type and distance (LTO + CCD) | EEA reuse policy, attribution |
-| Google TIM distance factors | Route/country distance correction | CC BY 4.0 (TIM repository; verify per file) |
-| Google TIM API emission figures | Typical-route snapshots (A3) | CC BY-SA 4.0 — share-alike for files built from them |
-| Aircraft type codes and families | Fallback rules (winglets, previous generation) | TIM appendix / ICAO Doc 8643 |
+| Teoh et al. ADS-B distance statistics (Zenodo record 8369564, referenced by the Google TIM README) | Route/country distance correction; also the list of origin–destination pairs actually flown | CC BY 4.0 |
+| Google TIM API emission figures | Typical per-class figure per route, as comparison and CI cross-check (A3) | CC BY-SA 4.0 — share-alike for files built from them |
+| Aircraft type codes and families | Fallback rules (winglets, previous generation), "newer aircraft" what-if | TIM appendix / ICAO Doc 8643 |
+| Seat layouts per aircraft type | Seats per cabin for the allocation step | Manufacturer publications, cited per type |
+| Load factor and cargo share | Allocation step | ICAO / IATA published averages; BTS T-100 (US, public domain) |
+
+Each data file carries its sources' licence in `REUSE.toml`: route files CC BY-SA 4.0 (TIM figures)
+together with CC BY 4.0 (distance statistics), `aircraft.json` with EEA attribution,
+`airports.json` / `coords.json` public domain.
 
 #### Data delivery: a read-only database baked into the deploy
 
@@ -104,21 +121,27 @@ pipeline turns raw datasets into validated, versioned static files served from t
 
 ```
 raw datasets ──> data-pipeline/ (TS scripts: filter, join, validate) ──> public/data/<data-version>/
-(OurAirports CSV,                                                         airports.json
- EEA tables,                                                              aircraft.json
- TIM factors)                                                             routes/<IATA>.json
+(OurAirports CSV,                                                         coords.json
+ EEA tables,                                                              airports.json
+ distance statistics,                                                     aircraft.json
+ TIM API snapshots)                                                       routes/<IATA>.json
 ```
 
 | File | Content | Estimated size (gzip) | Loaded |
 |---|---|---|---|
-| `airports.json` | Airports with IATA code and scheduled service: codes, name, city, country, lat/lon | ~100–150 KB | Lazily, on first input focus (autocomplete) |
-| `aircraft.json` | EEA fuel burn per type and distance band, fallback rules | ~50 KB | With the first calculation |
-| `routes/<IATA>.json` | Per origin airport: route distance factors, TIM typical-emission snapshots | a few KB each | On demand, one file per origin |
+| `coords.json` | IATA code + lat/lon only | ~30–40 KB | Eagerly on the planner: the first result needs it, also from a shared link |
+| `airports.json` | Airports with IATA code and scheduled service: codes, name, city, country | ~100–150 KB | Lazily, on first input focus (autocomplete) |
+| `aircraft.json` | EEA fuel burn per type and distance band, seats, fallback rules | ~50 KB | With the first calculation |
+| `routes/<IATA>.json` | Per origin airport: route distance factors, Google TIM per-class figures | a few KB each | On demand, one file per origin |
 
-Sizes are estimates to confirm with the first pipeline run.
+Sizes are estimates to confirm with the first pipeline run; the planner's data bytes are part of
+the performance budget (design.md).
 
-- **Distance is code, not data:** great-circle distance on WGS84 (haversine, or Vincenty for
-  extra precision) runs client-side in microseconds. Only the correction factors are data.
+- **Distance is code, not data:** haversine with a fixed mean Earth radius, pinned in the
+  methodology, runs client-side in microseconds. Only the correction factors are data.
+- **Route list:** the pipeline queries Google TIM (up to 1,000 markets per request) for the
+  origin–destination pairs in the distance statistics, i.e. routes actually flown. Markets without
+  a TIM figure simply have no comparison row.
 - **Sharding** by origin airport keeps the file count in the low thousands, comfortably within
   static-host limits.
 - **Versioning:** each result pins a data version as well as a methodology version, so old links
@@ -133,23 +156,28 @@ reference data.
 ### 4. Flight data strategy
 
 The hard gap: **which aircraft actually flies a route** comes from schedule data (OAG, Cirium),
-which is proprietary. Proposed hybrid:
+which is proprietary. Google's typical-emissions API does not close it: it returns grams per
+passenger per cabin class only, no aircraft types, so it cannot drive the LTO + CCD trace.
 
 | Need | Source |
 |---|---|
-| "Typical" emissions for a route (scheduled fleet mix) | Google TIM API, snapshotted at build time |
+| Result when no aircraft is chosen | Own engine with the documented default aircraft per distance band |
+| Typical figure for the route, for comparison | Google TIM API per-class figure, snapshotted at build time |
 | Explain, what-if, chosen aircraft, non-CO2, life cycle | Own engine on EEA data |
-| Validation | Own engine vs TIM API on a fixed route sample, run in CI |
+| "Newer aircraft" lever | What-if against the newer sibling of the assumed aircraft (ICAO Doc 8643 family), not a claim about the route |
+| Validation | Own engine vs TIM snapshots on a fixed route sample, run in CI |
 | Real per-flight data (future) | EU Flight Emissions Label, as airline participation grows |
 
-Owning the engine is what makes the trace and switchable assumptions possible; TIM supplies what
-open data cannot (fleet mix) and acts as an independent check.
+Owning the engine is what makes the trace and switchable assumptions possible; TIM is the
+independent check, shown to users and enforced in CI.
 
 ### 5. Web app
 
 - Static site, client-side calculation, deployable to any CDN. No accounts in v1.
 - State in the URL: every result is a shareable, reproducible link (see "Shareable links" below).
-- Map: MapLibre GL with OSM-based vector tiles; flights drawn as great-circle arcs.
+- Map: MapLibre GL with self-hosted OpenStreetMap vector tiles (PMTiles on Firebase Hosting, A8),
+  so no third-party tile host sees visitors; "© OpenStreetMap contributors" always visible on the
+  map. Flights drawn as great-circle arcs.
 - The explain view is generated from the engine trace, so it can never drift from the calculation.
 
 #### Shareable links
@@ -160,12 +188,14 @@ recomputed by the deterministic engine, never stored in the URL (shorter, and ca
 show a fake number).
 
 ```
-https://routeprint.org/en/flight?legs=PRG-JFK,JFK-PRG&cabin=Y&pax=1&nonco2=1.7&m=2026.1&d=2026.4
+https://routeprint.org/en/flight?legs=PRG-JFK,JFK-PRG&cabin=J&pax=2&m=2026.1&d=2026.4
 ```
+
+Business class, two passengers, return; the default non-CO2 setting is omitted.
 
 | Parameter | Meaning | Format / default |
 |---|---|---|
-| `legs` | Ordered legs, comma-separated; a connection is two legs | `FROM-TO` IATA codes, optional `:TYPE` ICAO aircraft type (`PRG-JFK:B789`) |
+| `legs` | Ordered legs, comma-separated; a stop is always two legs (`PRG-FRA,FRA-JFK`) | `FROM-TO` IATA codes, optional `:TYPE` ICAO aircraft type (`PRG-JFK:B789`) |
 | `cabin` | Cabin class | `Y` economy (default), `W` premium economy, `J` business, `F` first |
 | `pax` | Passengers | Integer, default 1 |
 | `nonco2` | Non-CO2 assumption | One of the methodology's listed values; omitted = methodology default |
@@ -255,9 +285,10 @@ files, and use no host-specific APIs in the app code.
 ## Quality and verification
 
 - Golden tests against published worked examples (TIM fuel table, EASA FEL examples, ATP-DEC
-  figures where reproducible).
+  figures where reproducible), plus exact expected outputs per retained methodology version.
 - CI cross-check against TIM snapshots on a fixed route set; deviations above a threshold fail the
-  build and must be explained in the methodology changelog.
+  build and must be explained in the methodology changelog. ICAO ICEC 2026 (CO2 only, has an API)
+  is a candidate second baseline.
 - Every parameter file validated against a schema: no value without a source id.
 
 ## Open decisions
@@ -271,3 +302,5 @@ files, and use no host-specific APIs in the app code.
 | A5 | Hosting | Firebase Hosting (+ Cloud Run later); Cloudflare Pages; Netlify | **Decided: Firebase Hosting.** Static today; the Google Cloud backend (section 8) attaches without migrating hosts. |
 | A6 | Non-CO2 application | Multiplier on TTW CO2; on WTW; per-effect model (ATP-DEC) | Multiplier on TTW for v1; per-effect model as a later methodology version |
 | A7 | Independence vs. offer integrations (phase 5+) | Plain links out to booking sites; affiliate partnerships; no booking links at all | Plain links out by default. If a flight or rail API is only available under affiliate terms: disclose it on the page, and keep ranking rules public and commission-blind. Decide before phase 5. |
+| A8 | Map tiles | Self-hosted PMTiles (OpenStreetMap extract) on Firebase Hosting; OSMF vector tile service; commercial provider | **Decided: self-hosted PMTiles** (2026-11-14). Keeps "no tracking" true (no third-party tile host), no dependency on a best-effort community service. Storage and extract size to check. |
+| A9 | Result when no aircraft is chosen | Own default aircraft per distance band, Google TIM as comparison; Google TIM figure as headline with an illustrative breakdown | **Decided: own default per band** (2026-11-14). The trace then always sums to the headline; TIM stays an independent check. The reference types per band still need choosing. |

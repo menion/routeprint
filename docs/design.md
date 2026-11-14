@@ -3,7 +3,8 @@
 What a person sees and does on Routeprint: get an honest footprint for a trip in seconds, then
 understand where every kilogram comes from and what would change it.
 
-Status: draft for discussion, 2026-11-05. Owner: Menion. Architecture:
+Status: draft, updated 2026-11-14 (D1, D4, D6 decided; docs review applied). Owner: Menion.
+Architecture:
 [architecture.md](architecture.md).
 
 ## Audience
@@ -58,6 +59,7 @@ emissions", not "non-CO2 ERF multiplier". Technical terms appear from layer 3 on
 | Largest Contentful Paint, mid-range phone on 4G | < 2.0 s |
 | JavaScript on the landing page | < 50 KB gzip |
 | JavaScript on the planner page, excluding the map | < 120 KB gzip |
+| Data on the planner's critical path (coordinates, route file, aircraft table) | < 100 KB gzip |
 | Map library and tiles | Loaded lazily, after the result is visible |
 | Fonts | System font stack or one subsetted variable font |
 | Lighthouse performance and accessibility | ≥ 95 |
@@ -73,9 +75,12 @@ The calculator is split over two pages (D6): a light landing page and a separate
 | Planner / result | Result, assumption switch, map, levers — the page shareable links point to |
 | Explain (per result) | Step-by-step derivation generated from the engine trace |
 | Methodology | Human-readable description of each methodology version, with changelog |
-| Sources | Bibliography: every paper, dataset and regulation used, with what it is used for |
+| Sources | Bibliography: every paper, dataset and regulation used, with what it is used for and its licence (incl. the CC BY-SA notice for Google TIM figures) |
 | Learn | Short explainers: non-CO2 effects, why calculators disagree, class and aircraft impact, why short flights use more fuel per km |
 | About | Who, why, funding, independence statement, licence |
+| Privacy | What "No tracking" means (D7), what the hosting provider logs, data attributions |
+
+The "How it works" item in the main navigation opens the Methodology page.
 
 ## Core flow (v1, flights)
 
@@ -101,7 +106,7 @@ Planner page (desktop: two columns; mobile order in brackets):
 | [plain sentence giving meaning, D3] | (2) WHAT CHANGES THIS   |
 | Range 0.42 – 1.1 t …            (?) | Business   2.3 t +240%  |
 | [CO2 only | Recommended | High]     | One stop   710 kg +8%   |
-| ████████ ███ ██████  breakdown      | Newest     560 kg −15%  |
+| ████████ ███ ██████  breakdown      | Newer type 560 kg −15%  |
 | [How is this calculated?] [Share]   |                         |
 | (4) CALCULATION (collapsed)         | (5) IN CONTEXT          |
 +-------------------------------------+-------------------------+
@@ -119,10 +124,13 @@ Notes (numbers illustrative: TIM economy PRG→JFK 417.5 kg WTW, non-CO2 1.7 on 
   calculation, and "Fly direct" appears as a lever.
 - Airport input accepts city names, airport names and IATA codes, with fuzzy matching and
   keyboard navigation. Typing "Prague" must just work.
-- Optional fields (aircraft type, airline) sit under "More precise" and are never required.
-- Defaults are announced, not hidden: "Aircraft: typical mix on this route".
+- The optional aircraft type sits under "More precise" and is never required. No airline field in
+  v1: no open data makes the result depend on it.
+- Defaults are announced, not hidden: "Aircraft: typical for this distance (Boeing 787-9)",
+  following the default aircraft per distance band (architecture A9).
 - Footer on every page carries the trust line "Methodology 2026.1 · data version 2026.4 · No
-  offsets · No tracking", so the versions behind every number are always visible.
+  offsets · No tracking" and links to the Privacy page, so the versions behind every number and
+  the meaning of "No tracking" are always one click away.
 
 ## Result anatomy
 
@@ -143,11 +151,12 @@ engine trace; one row per step, in calculation order:
 | Step | Value | Source |
 |---|---|---|
 | Great-circle distance PRG → JFK | 6,550 km | Haversine on OurAirports coordinates |
-| Route distance correction | × 1.05 | Teoh et al. via TIM, route factor |
+| Route distance correction | × 1.05 | Teoh et al., ADS-B flight tracks, route factor |
 | Fuel: take-off and landing (LTO, fixed per flight) | … kg | EEA Guidebook 2023, LTO table |
 | Fuel: climb, cruise and descent (CCD, by distance) | … kg | EEA Guidebook 2023, CCD table, interpolated |
-| Fuel per passenger (aircraft, seats, load, cabin class) | … kg | EEA / TIM allocation |
+| Fuel per passenger (seats, load factor, cabin weight) | … kg | Methodology parameters, each cited |
 | … | … | … |
+| Comparison: Google TIM typical for this route | … kg | Google TIM 2026 (CC BY-SA 4.0); independent, not an input |
 
 - Fuel is always shown as its two phases, so the short-flight effect is visible: the fixed
   take-off and landing fuel is spread over fewer kilometres, and the climb is a larger share of a
@@ -180,10 +189,11 @@ Ranked by size of effect for this specific trip, not a fixed list. Candidate lev
 
 - Cabin class
 - Direct vs. connecting (with the extra distance and the extra take-off/landing cycle)
-- Aircraft generation (where route data offers alternatives)
+- Newer aircraft: what-if against the newer sibling of the assumed aircraft (e.g. A320ceo →
+  A320neo), not a claim about which aircraft fly the route
 - Return vs. one-way framing
 
-Each lever shows the resulting value and the change in percent ("Business class: 4.5 t, +240%"),
+Each lever shows the resulting value and the change in percent ("Business class: 2.3 t, +240%"),
 with a "?" popup proving it: the two values
 compared, their source, and why they differ (e.g. business +240%: Google TIM per-class figures for
 this route, 1,434 kg vs. 417.5 kg, because a business seat takes several times the cabin area of an
@@ -201,7 +211,9 @@ Comparisons are easy to get wrong and easy to use for manipulation, so:
 
 ## Map
 
-- MapLibre GL, OSM-based tiles, calm and low-contrast base so the route is the focus.
+- MapLibre GL with self-hosted OpenStreetMap tiles (architecture A8), calm and low-contrast base
+  so the route is the focus. "© OpenStreetMap contributors" is always visible on the map, never
+  hidden behind a toggle.
 - Flights as great-circle arcs; connections as separate arcs with stop markers.
 - Optional "actual flown distance" note rather than a fake track.
 - Map is supporting, not required: the result is fully usable without it (and for screen readers).
@@ -263,8 +275,9 @@ number on the site.
 | # | Question | Proposal |
 |---|---|---|
 | D1 | Default display: one-way or return? | **Decided: one way** as the default; return is one tap away and doubles the trip |
-| D2 | Headline unit for long trips: kg or t? | kg below 1,000, t above, consistently |
+| D2 | Headline unit for long trips: kg or t? | kg below 1,000, t above, consistently. Round to two significant figures first, then pick the unit (995 kg → "1 t"). A range uses the unit of its upper end ("420 kg – 1.1 t" becomes "0.42 – 1.1 t") |
 | D3 | Which context reference points? | **Priority:** they also feed the meaning line under the headline, the part common users need most. Decide with the methodology work; each must be sourced |
 | D4 | High-estimate label for non-CO2 3.0 | **Decided: "High"** as the short switch label; the full wording sits behind its "?" |
 | D5 | Logo, typeface and exact colour tokens | Direction set (blue, pastel, calm); finalise after the clickable prototype |
 | D6 | Page structure for the calculator | **Decided: B** (after the prototype, 2026-11-14). Landing with intro + From → To + CTA, leading to a separate planner page with result, map and levers. The user is not overwhelmed at the start; the landing stays fast and map-free; the planner page is the share target. |
+| D7 | What "No tracking" promises | **Decided** (2026-11-14): no analytics, no cookies, no third-party requests (fonts and map tiles self-hosted); only the hosting provider's request logs, described on the Privacy page with their retention |
