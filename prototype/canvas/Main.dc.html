@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Routeprint — flight footprint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/2d6906d73ad84c4dea980390f72c247d">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="rp {{themeClass}}" style="font-family: Inter, system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column">
+
+<div class="rp-proto">{{protoLabel}}</div>
+
+<header class="rp-header">
+<div class="rp-wrap rp-header-in">
+<a class="rp-brand" href="{{homeHref}}">
+<svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="5" cy="19" r="3" stroke="currentColor" stroke-width="2"></circle><circle cx="21" cy="7" r="3" stroke="currentColor" stroke-width="2"></circle><path d="M7.5 17C10 10 14 8.5 18.3 8.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"></path></svg>
+<span>Routeprint</span>
+</a>
+<div style="margin-inline-start: auto; display: flex; align-items: center; gap: 6px">
+<nav class="rp-nav {{navClass}}" aria-label="Main">
+<a class="is-active" href="{{homeHref}}" aria-current="page">Calculator</a>
+<a href="#how">How it works</a>
+<a href="#learn">Learn</a>
+<a href="#about">About</a>
+</nav>
+<button class="rp-lang" type="button" aria-label="Language: English" style="min-height: 40px; min-width: 44px">EN</button>
+<button class="rp-lang" type="button" aria-label="{{themeLabel}}" title="{{themeLabel}}" onClick="{{toggleTheme}}" style="min-height: 40px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer">
+<sc-if value="{{isDark}}" hint-placeholder-val="{{ false }}">
+<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.7"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+</sc-if>
+<sc-if value="{{isLight}}" hint-placeholder-val="{{ true }}">
+<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.5 12.2A6.8 6.8 0 0 1 7.8 3.5a6.8 6.8 0 1 0 8.7 8.7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg>
+</sc-if>
+</button>
+<button class="rp-menu-btn" type="button" aria-label="Menu" aria-expanded="{{menu}}" onClick="{{toggleMenu}}">
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+</button>
+</div>
+</div>
+</header>
+
+<main style="flex: 1 0 auto">
+
+<sc-if value="{{isLanding}}" hint-placeholder-val="{{ true }}">
+<section class="rp-wrap rp-hero">
+<h1>How much does your flight really warm the climate?</h1>
+<p>One honest number for your trip, with every step shown and the open questions kept in view.</p>
+</section>
+</sc-if>
+
+<section class="rp-wrap" aria-label="Trip" style="{{tripSectionStyle}}">
+
+<sc-if value="{{showSummary}}" hint-placeholder-val="{{ false }}">
+<div class="rp-card rp-summary">
+<div class="rp-summary-route"><strong>{{routeText}}</strong><span>{{summaryMeta}}</span></div>
+<button class="rp-btn rp-btn-ghost" type="button" aria-expanded="false" aria-controls="rp-trip-form" onClick="{{editTrip}}">Edit trip</button>
+</div>
+</sc-if>
+
+<sc-if value="{{showForm}}" hint-placeholder-val="{{ true }}">
+<div class="rp-card" id="rp-trip-form">
+<form class="rp-form-main" onSubmit="{{onSubmit}}">
+<div class="rp-field">
+<label for="rp-from">From</label>
+<input id="rp-from" class="rp-input" type="text" role="combobox" autocomplete="off" value="{{fromQ}}" onChange="{{onFrom}}" onFocus="{{focusFrom}}" onBlur="{{blurFrom}}" aria-autocomplete="list" aria-expanded="{{fromOpen}}" aria-controls="rp-from-list">
+<sc-if value="{{fromOpen}}" hint-placeholder-val="{{ false }}">
+<div class="rp-suggest" id="rp-from-list" role="listbox" aria-label="Airports">
+<sc-for list="{{fromSug}}" as="s" hint-placeholder-count="3">
+<button type="button" role="option" aria-selected="false" onMouseDown="{{s.hold}}" onBlur="{{s.leave}}" onClick="{{s.pick}}"><strong>{{s.main}}</strong><span>{{s.sub}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{hasVia}}" hint-placeholder-val="{{ false }}">
+<div class="rp-field">
+<label for="rp-via">Stop</label>
+<div class="rp-via-row">
+<input id="rp-via" class="rp-input" type="text" role="combobox" autocomplete="off" value="{{viaQ}}" onChange="{{onVia}}" onFocus="{{focusVia}}" onBlur="{{blurVia}}" aria-autocomplete="list" aria-expanded="{{viaOpen}}" aria-controls="rp-via-list">
+<button class="rp-icon-btn" type="button" aria-label="Remove stop" onClick="{{removeStop}}">×</button>
+</div>
+<sc-if value="{{viaOpen}}" hint-placeholder-val="{{ false }}">
+<div class="rp-suggest" id="rp-via-list" role="listbox" aria-label="Airports">
+<sc-for list="{{viaSug}}" as="s" hint-placeholder-count="3">
+<button type="button" role="option" aria-selected="false" onMouseDown="{{s.hold}}" onBlur="{{s.leave}}" onClick="{{s.pick}}"><strong>{{s.main}}</strong><span>{{s.sub}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<div class="rp-field">
+<label for="rp-to">To</label>
+<input id="rp-to" class="rp-input {{toErrClass}}" type="text" role="combobox" autocomplete="off" value="{{toQ}}" onChange="{{onTo}}" onFocus="{{focusTo}}" onBlur="{{blurTo}}" aria-autocomplete="list" aria-expanded="{{toOpen}}" aria-controls="rp-to-list" aria-invalid="{{toErr}}" aria-describedby="rp-to-err">
+<sc-if value="{{toOpen}}" hint-placeholder-val="{{ false }}">
+<div class="rp-suggest" id="rp-to-list" role="listbox" aria-label="Airports">
+<sc-for list="{{toSug}}" as="s" hint-placeholder-count="3">
+<button type="button" role="option" aria-selected="false" onMouseDown="{{s.hold}}" onBlur="{{s.leave}}" onClick="{{s.pick}}"><strong>{{s.main}}</strong><span>{{s.sub}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{toErr}}" hint-placeholder-val="{{ false }}">
+<p class="rp-error" id="rp-to-err">We don’t know the airport code “{{toQ}}”. Try a city name or another code.</p>
+</sc-if>
+</div>
+<div class="rp-field rp-form-cta">
+<a class="rp-btn rp-btn-primary" href="{{ctaHref}}" onClick="{{ctaClick}}">{{ctaLabel}}</a>
+</div>
+</form>
+
+<div class="rp-form-links">
+<sc-if value="{{noVia}}" hint-placeholder-val="{{ true }}">
+<button class="rp-link-btn" type="button" onClick="{{addStop}}">+ Add stop</button>
+</sc-if>
+<button class="rp-link-btn" type="button" aria-expanded="{{precise}}" aria-controls="rp-precise" onClick="{{togglePrecise}}">{{preciseLabel}}</button>
+</div>
+
+<div class="rp-form-sub">
+<div class="rp-field">
+<span class="rp-label" id="rp-trip-l">Trip</span>
+<div class="rp-seg" role="group" aria-labelledby="rp-trip-l">
+<button type="button" aria-pressed="{{tripOneway}}" onClick="{{setOneway}}">One way</button>
+<button type="button" aria-pressed="{{tripReturn}}" onClick="{{setReturn}}">Return</button>
+</div>
+</div>
+<div class="rp-field">
+<label for="rp-cabin">Cabin</label>
+<select id="rp-cabin" class="rp-select" value="{{cabin}}" onChange="{{onCabin}}">
+<option value="Y">Economy</option>
+<option value="W">Premium economy</option>
+<option value="J">Business</option>
+<option value="F">First</option>
+</select>
+</div>
+<div class="rp-field">
+<label for="rp-pax">Passengers</label>
+<select id="rp-pax" class="rp-select" value="{{paxStr}}" onChange="{{onPax}}">
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+</select>
+</div>
+<sc-if value="{{precise}}" hint-placeholder-val="{{ false }}">
+<div class="rp-field" id="rp-precise">
+<label for="rp-acft">Aircraft</label>
+<div style="display: flex; gap: 8px; align-items: center">
+<select id="rp-acft" class="rp-select" value="{{aircraft}}" onChange="{{onAircraft}}">
+<option value="mix">Typical mix on this route</option>
+<option value="a339">Airbus A330-900neo (newest)</option>
+<option value="b789">Boeing 787-9</option>
+<option value="a333">Airbus A330-300</option>
+<option value="b763">Boeing 767-300ER</option>
+</select>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About the aircraft choice" aria-expanded="{{o.acft}}" onClick="{{q.acft}}">?</button>
+<sc-if value="{{o.acft}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop is-end" role="dialog" aria-label="About the aircraft choice">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.acft}}">×</button>
+<p>Aircraft types burn different amounts of fuel per seat. Without a choice we use the typical mix of aircraft flying this route.</p>
+<div class="rp-pop-derive">{{acftName}}: × {{acftFactor}} vs. typical mix</div>
+<div class="rp-pop-foot"><span class="rp-example">example values</span><span class="rp-chip">EEA 2023 tables per type (planned)</span></div>
+</div>
+</sc-if>
+</span>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isLanding}}" hint-placeholder-val="{{ true }}">
+<p class="rp-trust" style="margin-top: 8px">Open methodology · No offsets · No tracking</p>
+</sc-if>
+</section>
+
+<sc-if value="{{isLanding}}" hint-placeholder-val="{{ true }}">
+<section class="rp-wrap" style="margin-top: 28px" aria-label="Why Routeprint">
+<div class="rp-points">
+<div class="rp-point">
+<div class="rp-point-ic"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 14h14M5 10h10M7 6h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></div>
+<div><h3>A range, not a guess</h3><p>One headline number, plus how much it moves with the open science questions.</p></div>
+</div>
+<div class="rp-point">
+<div class="rp-point-ic"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.8"></circle><path d="M8.2 8a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1v.6M10 14h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></div>
+<div><h3>Every number explained</h3><p>Tap any ? to see where a number comes from, down to the source.</p></div>
+</div>
+<div class="rp-point">
+<div class="rp-point-ic"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.5 4 5v4.5c0 3.8 2.6 6.5 6 8 3.4-1.5 6-4.2 6-8V5l-6-2.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg></div>
+<div><h3>Independent</h3><p>No offsets, no ads, no tracking. Open methodology and code on GitHub.</p></div>
+</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isPlanner}}" hint-placeholder-val="{{ false }}">
+<section class="rp-wrap" id="result" style="margin-top: 16px" aria-label="Result">
+<div class="rp-row rp-plan">
+
+<div class="rp-main-col">
+
+<sc-if value="{{showOldNotice}}" hint-placeholder-val="{{ false }}">
+<div class="rp-notice rp-o-notice" role="status">
+<span>Calculated with methodology 2026.1. With the current version: <b>610 kg</b> (−8%).</span>
+<button class="rp-link-btn" type="button" onClick="{{dismissOld}}">Show current</button>
+</div>
+</sc-if>
+
+<div class="rp-card rp-stack rp-o-result" style="gap: 14px">
+<div class="rp-route">
+<span>{{routeText}}</span><span aria-hidden="true">·</span><span>{{cabinName}}</span><span aria-hidden="true">·</span><span>{{paxLabel}}</span>
+</div>
+
+<div class="rp-result-head">
+<span class="rp-num">{{headNum}}</span>
+<span class="rp-num-unit">{{headUnit}} CO2e</span>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="How is this number made?" aria-expanded="{{o.headline}}" onClick="{{q.headline}}">?</button>
+<sc-if value="{{o.headline}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop" role="dialog" aria-label="About the headline number">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.headline}}">×</button>
+<p>Your share of this trip’s climate impact, as CO2-equivalent. It counts burned fuel, producing that fuel, and high-altitude effects as set by the switch below.</p>
+<div class="rp-pop-derive">{{d.fuel}} + {{d.prod}} + {{d.non}} = {{d.total}} kg ≈ {{headNum}} {{headUnit}}</div>
+<div class="rp-pop-foot"><span class="rp-chip">Google TIM 2026</span><span class="rp-chip">EEA 2023</span><span class="rp-chip">UK Government</span></div>
+<p class="rp-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m3 7.5 2.5 2.5L11 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{d.checkHead}}</p>
+<p><button class="rp-link-btn" type="button" onClick="{{openExplain}}">Read more</button></p>
+</div>
+</sc-if>
+</span>
+</div>
+<div class="rp-scope">per passenger, {{tripWord}}</div>
+<p class="rp-placeholder">[One plain sentence that gives this number meaning, compared with a sourced reference point — to be decided in D3]</p>
+
+<div class="rp-range">
+<span>Range {{rangeText}}, depending on how contrail and high-altitude effects are counted</span>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="Why a range?" aria-expanded="{{o.range}}" onClick="{{q.range}}">?</button>
+<sc-if value="{{o.range}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop is-end" role="dialog" aria-label="About the range">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.range}}">×</button>
+<p>Scientists don’t yet agree how strongly contrails and nitrogen oxides at cruise altitude warm the climate. The range runs from counting CO2 only to a high estimate.</p>
+<div class="rp-pop-derive">CO2 only {{d.lo}} · recommended {{d.mid}} · high {{d.hi}}</div>
+<div class="rp-pop-foot"><span class="rp-chip">Lee et al. 2021</span><span class="rp-chip">Teoh et al. 2024</span></div>
+<p><button class="rp-link-btn" type="button" onClick="{{openExplain}}">Read more</button></p>
+</div>
+</sc-if>
+</span>
+</div>
+
+<div class="rp-switch-wrap">
+<span class="rp-label" id="rp-sw-l">High-altitude effects</span>
+<div class="rp-switch" role="group" aria-labelledby="rp-sw-l">
+<div class="rp-switch-opt {{sw.co2Cls}}">
+<button type="button" aria-pressed="{{sw.co2}}" onClick="{{setCo2}}">CO2 only</button>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About CO2 only" aria-expanded="{{o.swCo2}}" onClick="{{q.swCo2}}">?</button>
+<sc-if value="{{o.swCo2}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop" role="dialog" aria-label="About CO2 only">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.swCo2}}">×</button>
+<p>Counts only CO2 from burning and producing the fuel. Many airline and industry calculators show this number.</p>
+<div class="rp-pop-derive">fuel CO2 {{d.fuel}} + production {{d.prod}} kg → {{d.lo}}</div>
+<div class="rp-pop-foot"><span class="rp-chip">ICAO</span><span class="rp-chip">Google TIM 2026</span></div>
+</div>
+</sc-if>
+</span>
+</div>
+<div class="rp-switch-opt {{sw.defCls}}">
+<button type="button" aria-pressed="{{sw.def}}" onClick="{{setDef}}">Recommended</button>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About the recommended setting" aria-expanded="{{o.swDef}}" onClick="{{q.swDef}}">?</button>
+<sc-if value="{{o.swDef}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop" role="dialog" aria-label="About the recommended setting">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.swDef}}">×</button>
+<p>Includes high-altitude effects: the warming from contrails and nitrogen oxides at cruise altitude, counted at 0.7× the fuel-burn CO2. This is the UK Government’s central value.</p>
+<div class="rp-pop-derive">{{d.fuel}} + {{d.prod}} + 0.7 × {{d.fuel}} kg → {{d.mid}}</div>
+<div class="rp-pop-foot"><span class="rp-chip">UK Government</span><span class="rp-chip">Lee et al. 2021</span></div>
+</div>
+</sc-if>
+</span>
+</div>
+<div class="rp-switch-opt {{sw.highCls}}">
+<button type="button" aria-pressed="{{sw.high}}" onClick="{{setHigh}}">High</button>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About the high estimate" aria-expanded="{{o.swHigh}}" onClick="{{q.swHigh}}">?</button>
+<sc-if value="{{o.swHigh}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop is-end" role="dialog" aria-label="About the high estimate">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.swHigh}}">×</button>
+<p>A high estimate that counts high-altitude effects at 2× the fuel-burn CO2, as some calculators do.</p>
+<div class="rp-pop-derive">{{d.fuel}} + {{d.prod}} + 2 × {{d.fuel}} kg → {{d.hi}}</div>
+<div class="rp-pop-foot"><span class="rp-chip">atmosfair method</span><span class="rp-chip">Lee et al. 2021</span></div>
+</div>
+</sc-if>
+</span>
+</div>
+</div>
+</div>
+
+<div class="rp-stack" style="gap: 8px">
+<div class="rp-bar" role="img" aria-label="{{barAria}}">
+<span class="rp-bar-seg" style="{{bar.fuel}}"></span>
+<span class="rp-bar-seg" style="{{bar.prod}}"></span>
+<span class="rp-bar-seg" style="{{bar.non}}"></span>
+</div>
+<div class="rp-legend">
+<div class="rp-legend-item">
+<span class="rp-dot" style="background: var(--rp-cat-1)"></span>Fuel burned <b>{{d.fuel}} kg</b>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About fuel burned" aria-expanded="{{o.bFuel}}" onClick="{{q.bFuel}}">?</button>
+<sc-if value="{{o.bFuel}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop" role="dialog" aria-label="About fuel burned">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.bFuel}}">×</button>
+<p>CO2 released when the aircraft burns jet fuel, for your seat.</p>
+<div class="rp-pop-derive">{{d.fuelKg}} kg fuel × 3.19 = {{d.fuel}} kg CO2</div>
+<div class="rp-pop-foot"><span class="rp-chip">EEA 2023</span><span class="rp-chip">ISO 14083</span><span class="rp-chip">CORSIA</span></div>
+<p><button class="rp-link-btn" type="button" onClick="{{openExplain}}">Read more</button></p>
+</div>
+</sc-if>
+</span>
+</div>
+<div class="rp-legend-item">
+<span class="rp-dot" style="background: var(--rp-cat-2)"></span>Fuel production <b>{{d.prod}} kg</b>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About fuel production" aria-expanded="{{o.bProd}}" onClick="{{q.bProd}}">?</button>
+<sc-if value="{{o.bProd}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop" role="dialog" aria-label="About fuel production">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.bProd}}">×</button>
+<p>Emissions from extracting, refining and transporting the fuel before it reaches the aircraft.</p>
+<div class="rp-pop-derive">{{d.fuelKg}} kg fuel × 0.65 = {{d.prod}} kg CO2e</div>
+<div class="rp-pop-foot"><span class="rp-chip">CORSIA life-cycle values</span></div>
+<p><button class="rp-link-btn" type="button" onClick="{{openExplain}}">Read more</button></p>
+</div>
+</sc-if>
+</span>
+</div>
+<div class="rp-legend-item">
+<span class="rp-dot" style="background: var(--rp-cat-3)"></span>Contrails and other high-altitude effects <b>{{d.non}} kg</b>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About high-altitude effects" aria-expanded="{{o.bNon}}" onClick="{{q.bNon}}">?</button>
+<sc-if value="{{o.bNon}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop" role="dialog" aria-label="About high-altitude effects">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.bNon}}">×</button>
+<p>Contrails and nitrogen oxides from aircraft at cruise altitude warm the climate in addition to CO2. {{d.nonSentence}}</p>
+<div class="rp-pop-derive">{{d.fuel}} kg × {{d.nonFactor}} = {{d.non}} kg</div>
+<div class="rp-pop-foot"><span class="rp-chip">UK Government</span><span class="rp-chip">Lee et al. 2021</span></div>
+<p><button class="rp-link-btn" type="button" onClick="{{openExplain}}">Read more</button></p>
+</div>
+</sc-if>
+</span>
+</div>
+<div class="rp-legend-item">
+<span class="rp-dot rp-ctx-ph" style="border: 1px dashed var(--rp-ink-3)"></span>Aircraft and airport life cycle <b style="font-weight: 500; color: var(--rp-ink-3)">not counted yet</b>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About the aircraft and airport life cycle" aria-expanded="{{o.bLca}}" onClick="{{q.bLca}}">?</button>
+<sc-if value="{{o.bLca}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop is-end" role="dialog" aria-label="About the aircraft and airport life cycle">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.bLca}}">×</button>
+<p>Building the aircraft, running airports, in-flight catering and luggage also cause emissions. They will be added as a separate part in a later version, following a published life-cycle method.</p>
+<div class="rp-pop-derive">Not counted yet: no number is shown until it is sourced.</div>
+<div class="rp-pop-foot"><span class="rp-chip">ATP-DEC, McFall et al. 2025</span><span class="rp-chip">Planned for phase 2</span></div>
+</div>
+</sc-if>
+</span>
+</div>
+</div>
+</div>
+
+<sc-if value="{{showPaxTotal}}" hint-placeholder-val="{{ false }}">
+<p class="rp-scope">For {{pax}} passengers together: <b>{{paxTotal}}</b> CO2e</p>
+</sc-if>
+
+<p class="rp-note">{{precisionNote}}</p>
+
+<div class="rp-actions">
+<button class="rp-btn rp-btn-ghost" type="button" aria-expanded="{{explain}}" aria-controls="rp-explain" onClick="{{toggleExplain}}">{{explainLabel}}</button>
+<button class="rp-btn rp-btn-primary" type="button" onClick="{{share}}">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 10V2M5 4.5 8 1.5l3 3M3 8v5.5h10V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+Share
+</button>
+</div>
+</div>
+
+<sc-if value="{{explain}}" hint-placeholder-val="{{ false }}">
+<section class="rp-card rp-stack rp-o-explain" id="rp-explain" aria-label="How it is calculated">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between">
+<h2 style="font-size: 18px">How this number is calculated</h2>
+<span class="rp-badge">Methodology 2026.1</span>
+</div>
+<ol class="rp-steps">
+<sc-for list="{{steps}}" as="st" hint-placeholder-count="8">
+<li class="rp-step {{st.cls}}">
+<span class="rp-step-n">{{st.n}}</span>
+<div><div class="rp-step-label">{{st.label}} <sc-if value="{{st.example}}" hint-placeholder-val="{{ false }}"><span class="rp-example">example</span></sc-if></div><div class="rp-step-src">{{st.src}}</div></div>
+<span class="rp-step-val">{{st.val}}</span>
+</li>
+</sc-for>
+</ol>
+<p class="rp-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m3 7.5 2.5 2.5L11 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{d.checkExplain}}</p>
+<div class="rp-note rp-stack" style="gap: 8px">
+<h3 style="font-size: 15px; font-weight: 650">Why short flights burn more fuel per kilometre</h3>
+<p>Take-off, climb and landing need the same fuel whether the flight is short or long. On a short flight that fixed part is spread over fewer kilometres, and the climb is a bigger share of the trip.</p>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums">
+<caption class="rp-sr">Fuel per kilometre for a Boeing 787-9 by flight distance</caption>
+<thead>
+<tr style="color: var(--rp-ink-2)"><th scope="col" style="text-align: start; font-weight: 600; padding: 4px 0">Flight distance</th><th scope="col" style="text-align: end; font-weight: 600">Take-off and landing</th><th scope="col" style="text-align: end; font-weight: 600">Climb, cruise, descent</th><th scope="col" style="text-align: end; font-weight: 600">Fuel per km</th></tr>
+</thead>
+<tbody>
+<tr style="border-top: 1px solid var(--rp-border)"><td style="padding: 4px 0">926 km</td><td style="text-align: end">1,638 kg</td><td style="text-align: end">5,852 kg</td><td style="text-align: end; font-weight: 700">8.1 kg</td></tr>
+<tr style="border-top: 1px solid var(--rp-border)"><td style="padding: 4px 0">1,852 km</td><td style="text-align: end">1,638 kg</td><td style="text-align: end">10,874 kg</td><td style="text-align: end; font-weight: 700">6.8 kg</td></tr>
+<tr style="border-top: 1px solid var(--rp-border)"><td style="padding: 4px 0">9,260 km</td><td style="text-align: end">1,638 kg</td><td style="text-align: end">52,962 kg</td><td style="text-align: end; font-weight: 700">5.9 kg</td></tr>
+</tbody>
+</table>
+</div>
+<div class="rp-pop-foot" style="margin-top: 0"><span class="rp-chip">EEA 2023, via Google TIM documentation</span><span class="rp-chip">Boeing 787-9, whole aircraft</span></div>
+</div>
+<p style="font-size: 14px"><a href="https://github.com/menion/routeprint">Full methodology and source code on GitHub</a></p>
+<p class="rp-support">This calculation is free and open. If it helped you, you can <a href="https://github.com/sponsors/menion">support the work</a>.</p>
+</section>
+</sc-if>
+
+</div>
+
+<div class="rp-side-col">
+
+<div class="rp-card rp-stack rp-o-map" style="gap: 10px">
+<h2 class="rp-card-title">Route</h2>
+<div class="rp-map">
+<sc-if value="{{mapReady}}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 800 500" role="img" aria-label="{{mapAria}}">
+<g stroke="var(--rp-border)" stroke-width="1">
+<path d="M31 0V500M92 0V500M154 0V500M215 0V500M277 0V500M338 0V500M400 0V500M462 0V500M523 0V500M585 0V500M646 0V500M708 0V500M769 0V500"></path>
+<path d="M0 83H800M0 187H800M0 291H800M0 395H800"></path>
+</g>
+<text x="330" y="360" font-size="18" fill="var(--rp-ink-3)" font-family="Inter, sans-serif" letter-spacing="3">ATLANTIC OCEAN</text>
+<sc-if value="{{viaFra}}" hint-placeholder-val="{{ false }}">
+<path class="rp-map-arc" pathLength="1" d="M131 285 Q 384 30 637 187" fill="none" stroke="var(--rp-accent)" stroke-width="3.5" stroke-linecap="round"></path>
+<path class="rp-map-arc" pathLength="1" d="M637 187 Q 655 176 672 186" fill="none" stroke="var(--rp-accent)" stroke-width="3.5" stroke-linecap="round"></path>
+<circle cx="637" cy="187" r="6" fill="var(--rp-surface)" stroke="var(--rp-accent)" stroke-width="3"></circle>
+<text x="600" y="160" font-size="17" font-weight="700" fill="var(--rp-ink)" font-family="Inter, sans-serif">FRA</text>
+</sc-if>
+<sc-if value="{{direct}}" hint-placeholder-val="{{ true }}">
+<path class="rp-map-arc" pathLength="1" d="M131 285 Q 401 15 672 186" fill="none" stroke="var(--rp-accent)" stroke-width="3.5" stroke-linecap="round"></path>
+</sc-if>
+<circle cx="131" cy="285" r="7" fill="var(--rp-surface)" stroke="var(--rp-accent)" stroke-width="3"></circle>
+<circle cx="672" cy="186" r="7" fill="var(--rp-surface)" stroke="var(--rp-accent)" stroke-width="3"></circle>
+<text x="120" y="320" font-size="20" font-weight="700" fill="var(--rp-ink)" font-family="Inter, sans-serif">JFK</text>
+<text x="120" y="342" font-size="15" fill="var(--rp-ink-2)" font-family="Inter, sans-serif">New York</text>
+<text x="652" y="222" font-size="20" font-weight="700" fill="var(--rp-ink)" font-family="Inter, sans-serif">PRG</text>
+<text x="652" y="244" font-size="15" fill="var(--rp-ink-2)" font-family="Inter, sans-serif">Prague</text>
+</svg>
+</sc-if>
+<sc-if value="{{mapLoading}}" hint-placeholder-val="{{ false }}">
+<div class="rp-skel">Loading map…</div>
+</sc-if>
+</div>
+<div class="rp-range">
+<span>{{distanceText}}</span>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About the distance" aria-expanded="{{o.map}}" onClick="{{q.map}}">?</button>
+<sc-if value="{{o.map}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop is-end" role="dialog" aria-label="About the distance">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.map}}">×</button>
+<p>The shortest path over the globe between the two airports, from their coordinates. Real flights fly about 5% further because of air routes, weather and congestion.</p>
+<div class="rp-pop-derive">6,550 km × 1.05 ≈ 6,880 km</div>
+<div class="rp-pop-foot"><span class="rp-chip">OurAirports</span><span class="rp-chip">Teoh et al. via Google TIM</span></div>
+</div>
+</sc-if>
+</span>
+</div>
+<p class="rp-map-cap">Illustrative map. The product uses MapLibre with OpenStreetMap tiles, loaded after the result.</p>
+</div>
+
+<div class="rp-card rp-stack rp-o-levers" style="gap: 6px">
+<h2 class="rp-card-title">What changes this</h2>
+<ul class="rp-levers">
+<sc-for list="{{levers}}" as="lv" hint-placeholder-count="4">
+<li class="rp-lever">
+<div class="rp-lever-name">
+<span>{{lv.name}}</span>
+<sc-if value="{{lv.example}}" hint-placeholder-val="{{ false }}"><span class="rp-example">example</span></sc-if>
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="{{lv.qLabel}}" aria-expanded="{{lv.open}}" onClick="{{lv.toggle}}">?</button>
+<sc-if value="{{lv.open}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop" role="dialog" aria-label="{{lv.qLabel}}">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{lv.toggle}}">×</button>
+<p>{{lv.text}}</p>
+<div class="rp-pop-derive">{{lv.derive}}</div>
+<div class="rp-pop-foot"><span class="rp-chip">{{lv.source}}</span></div>
+</div>
+</sc-if>
+</span>
+</div>
+<span class="rp-lever-mini" aria-hidden="true"><span style="{{lv.miniStyle}}"></span></span>
+<span class="rp-lever-delta {{lv.cls}}">{{lv.value}}</span>
+<span class="rp-lever-kg">{{lv.pct}}</span>
+<button class="rp-chev" type="button" aria-label="{{lv.goLabel}}" onClick="{{lv.go}}">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</li>
+</sc-for>
+</ul>
+</div>
+
+<div class="rp-card rp-stack rp-o-context" style="gap: 6px">
+<h2 class="rp-card-title">In context
+<span class="rp-q">
+<button class="rp-q-btn" type="button" aria-label="About the reference points" aria-expanded="{{o.ctx}}" onClick="{{q.ctx}}">?</button>
+<sc-if value="{{o.ctx}}" hint-placeholder-val="{{ false }}">
+<div class="rp-pop is-end" role="dialog" aria-label="About the reference points">
+<button class="rp-pop-close" type="button" aria-label="Close" onClick="{{q.ctx}}">×</button>
+<p>Reference points will come from sourced datasets, each with its source and year. Until they are chosen, no numbers are shown.</p>
+<div class="rp-pop-foot"><span class="rp-chip">Open decision D3</span></div>
+</div>
+</sc-if>
+</span>
+</h2>
+<div class="rp-ctx-row">
+<span>This trip</span>
+<span class="rp-ctx-bar"><span style="width: 100%; background: var(--rp-cat-1)"></span></span>
+<span class="rp-ctx-val">{{headNum}} {{headUnit}}</span>
+</div>
+<div class="rp-ctx-row">
+<span>Reference A (source to be decided)</span>
+<span class="rp-ctx-bar rp-ctx-ph"></span>
+<span class="rp-ctx-val">[value]</span>
+</div>
+<div class="rp-ctx-row">
+<span>Reference B (source to be decided)</span>
+<span class="rp-ctx-bar rp-ctx-ph"></span>
+<span class="rp-ctx-val">[value]</span>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+</sc-if>
+
+</main>
+
+<footer class="rp-footer">
+<div class="rp-wrap rp-footer-in">
+<nav class="rp-footer-links" aria-label="Footer">
+<a href="#methodology">Methodology</a>
+<a href="#sources">Sources</a>
+<a href="https://github.com/menion/routeprint">GitHub</a>
+<a href="#licence">Licence</a>
+<a href="https://github.com/sponsors/menion">Support Routeprint</a>
+</nav>
+<span style="margin-inline-start: auto">Methodology 2026.1 · data version 2026.4 · No offsets · No tracking</span>
+</div>
+</footer>
+
+<sc-if value="{{toastOn}}" hint-placeholder-val="{{ false }}">
+<div class="rp-toast" role="status">{{toast}}</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"variant":{"editor":"enum","options":["landing","planner"],"default":"landing","section":"Prototype"},"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Prototype"},"sharedOld":{"editor":"boolean","default":false,"section":"States"},"showError":{"editor":"boolean","default":false,"section":"States"},"startExplain":{"editor":"boolean","default":false,"section":"States"},"plannerHref":{"editor":null,"tsType":"string","default":"B-Planner-Desktop-Light.dc.html"},"landingHref":{"editor":null,"tsType":"string","default":"Main.dc.html"},"$preview":{"width":1280,"height":900}}'>
+// Mock data: Google TIM per-class well-to-wake kg CO2e per passenger, PRG -> JFK, one way.
+var TIM = { Y: 417.5, W: 579.6, J: 1434.2, F: 1763.9 };
+var CABIN = { Y: 'Economy', W: 'Premium economy', J: 'Business', F: 'First' };
+var RANK = { Y: 0, W: 1, J: 2, F: 3 };
+var TTW = 3.1894;
+var WTW = 3.8359;
+var MULT = { co2: 1.0, def: 1.7, high: 3.0 };
+// B787-9 (TIM README, EEA 2023): LTO 1,638 kg; CCD interpolated at 3,715 NM (6,880 km) = 39,441 kg.
+var LTO_SHARE = 1638 / (1638 + 39441);
+// A stop adds distance and one extra take-off/landing: EXAMPLE factor.
+var VIA_F = 1.08;
+// Per-aircraft factors vs. the route's typical mix: EXAMPLE values until the engine reads EEA tables.
+var AIRCRAFT = {
+  mix: { name: 'Typical mix on this route', f: 1.0 },
+  a339: { name: 'Airbus A330-900neo', f: 0.85 },
+  b789: { name: 'Boeing 787-9', f: 0.88 },
+  a333: { name: 'Airbus A330-300', f: 1.05 },
+  b763: { name: 'Boeing 767-300ER', f: 1.14 }
+};
+var AIRPORTS = [
+  { code: 'PRG', main: 'Prague (PRG)', sub: 'Václav Havel Airport, Czechia', keys: 'prague praha prg vaclav havel' },
+  { code: 'JFK', main: 'New York (JFK)', sub: 'John F. Kennedy International, USA', keys: 'new york jfk kennedy' },
+  { code: 'EWR', main: 'New York (EWR)', sub: 'Newark Liberty International, USA', keys: 'new york newark ewr' },
+  { code: 'FRA', main: 'Frankfurt (FRA)', sub: 'Frankfurt am Main, Germany', keys: 'frankfurt fra' },
+  { code: 'CDG', main: 'Paris (CDG)', sub: 'Charles de Gaulle, France', keys: 'paris cdg charles de gaulle' },
+  { code: 'OPO', main: 'Porto (OPO)', sub: 'Francisco Sá Carneiro, Portugal', keys: 'porto opo' },
+  { code: 'PMI', main: 'Palma de Mallorca (PMI)', sub: 'Palma de Mallorca, Spain', keys: 'palma mallorca pmi' },
+  { code: 'VIE', main: 'Vienna (VIE)', sub: 'Vienna International, Austria', keys: 'vienna wien vie' },
+  { code: 'LHR', main: 'London (LHR)', sub: 'Heathrow, United Kingdom', keys: 'london heathrow lhr' }
+];
+
+function acfFactor(id) {
+  return AIRCRAFT[id] ? AIRCRAFT[id].f : 1.0;
+}
+function sig2(x) {
+  if (!x) {
+    return 0;
+  }
+  var p = Math.pow(10, Math.floor(Math.log10(Math.abs(x))) - 1);
+  return Math.round(x / p) * p;
+}
+function fmtInt(x) {
+  return Math.round(x).toLocaleString('en-US');
+}
+function fmtMass(x) {
+  var r = sig2(x);
+  if (r >= 1000) {
+    return { num: String(Number((r / 1000).toPrecision(2))), unit: 't' };
+  }
+  return { num: String(Math.round(r)), unit: 'kg' };
+}
+function fmtT(x) {
+  return String(Number((sig2(x) / 1000).toPrecision(2)));
+}
+function fmtPct(p) {
+  var v = Math.abs(p) >= 10 ? sig2(p) : Math.round(p);
+  return (v > 0 ? '+' : '−') + Math.abs(v) + '%';
+}
+function calc(cabin, mode, trip, acf, via) {
+  var mul = trip === 'return' ? 2 : 1;
+  var wtw = TIM[cabin] * acfFactor(acf) * (via ? VIA_F : 1);
+  var ttw = wtw * TTW / WTW;
+  var wtt = wtw - ttw;
+  var m = MULT[mode];
+  var non = ttw * (m - 1);
+  return {
+    mul: mul, wtw: wtw, ttw: ttw, wtt: wtt, m: m,
+    fuelKg: (ttw / TTW) * mul,
+    fuel: ttw * mul, prod: wtt * mul, non: non * mul,
+    total: (wtw + non) * mul,
+    lo: wtw * mul, mid: (wtw + ttw * 0.7) * mul, hi: (wtw + ttw * 2) * mul
+  };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var c = calc('Y', 'def', 'oneway', 'mix', null);
+    this.state = {
+      mode: 'def', cabin: 'Y', trip: 'oneway', pax: 1, aircraft: 'mix', precise: false,
+      via: null, viaOpen: false, editing: false,
+      shown: c.total, pop: null,
+      explain: !!props.startExplain,
+      menu: false, toast: null, oldDismissed: false, theme: null,
+      fromQ: 'Prague (PRG)', toQ: props.showError ? 'XYZ' : 'New York (JFK)',
+      fromOpen: false, toOpen: false, mapReady: false
+    };
+  }
+
+  componentDidMount() {
+    var self = this;
+    this.mapTimer = setTimeout(function () {
+      self.setState({ mapReady: true });
+    }, 900);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.mapTimer);
+    clearTimeout(this.toastTimer);
+    clearTimeout(this.blurTimer);
+    cancelAnimationFrame(this.raf);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    var s = this.state;
+    if (prevState.mode !== s.mode
+      || prevState.cabin !== s.cabin
+      || prevState.trip !== s.trip
+      || prevState.aircraft !== s.aircraft
+      || (prevState.via === null) !== (s.via === null)) {
+      this.animateTo(calc(s.cabin, s.mode, s.trip, s.aircraft, s.via !== null).total);
+    }
+  }
+
+  animateTo(target) {
+    var self = this;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    cancelAnimationFrame(this.raf);
+    if (reduce) {
+      this.setState({ shown: target });
+      return;
+    }
+    var from = this.state.shown;
+    var t0 = performance.now();
+    var step = function (now) {
+      var k = Math.min(1, (now - t0) / 350);
+      var e = 1 - Math.pow(1 - k, 3);
+      self.setState({ shown: from + (target - from) * e });
+      if (k < 1) {
+        self.raf = requestAnimationFrame(step);
+      }
+    };
+    this.raf = requestAnimationFrame(step);
+  }
+
+  togglePop(id) {
+    this.setState({ pop: this.state.pop === id ? null : id });
+  }
+
+  // Closes a suggestion list unless focus moved into it (keyboard users Tab onto the options).
+  blurField(field, e) {
+    var self = this;
+    var next = e && e.relatedTarget;
+    if (next && next.closest && next.closest('.rp-suggest')) {
+      return;
+    }
+    clearTimeout(this.blurTimer);
+    this.blurTimer = setTimeout(function () {
+      var patch = {};
+      patch[field + 'Open'] = false;
+      self.setState(patch);
+    }, 180);
+  }
+
+  suggestions(q, field, onPick) {
+    var self = this;
+    var t = (q || '').trim().toLowerCase();
+    var list = AIRPORTS.filter(function (a) {
+      return t.length > 0 && (a.keys.indexOf(t) >= 0 || a.main.toLowerCase().indexOf(t) >= 0);
+    }).slice(0, 5);
+    if (list.length === 0) {
+      list = AIRPORTS.slice(0, 4);
+    }
+    return list.map(function (a) {
+      return {
+        main: a.main, sub: a.sub,
+        pick: function () {
+          clearTimeout(self.blurTimer);
+          onPick(a.main);
+        },
+        // keeps the input focused, so a slow click is not lost to the blur timer
+        hold: function (e) {
+          e.preventDefault();
+        },
+        leave: function (e) {
+          self.blurField(field, e);
+        }
+      };
+    });
+  }
+
+  renderVals() {
+    var self = this;
+    var s = this.state;
+    var p = this.props;
+    var variant = p.variant || 'landing';
+    var isLanding = variant === 'landing';
+    var isPlanner = variant === 'planner';
+    var isDark = (s.theme || p.theme) === 'dark';
+    var hasVia = s.via !== null;
+    var viaName = hasVia && s.via ? s.via : 'a stop';
+    var c = calc(s.cabin, s.mode, s.trip, s.aircraft, hasVia);
+    var acf = AIRCRAFT[s.aircraft] || AIRCRAFT.mix;
+    var isMix = s.aircraft === 'mix';
+    var head = fmtMass(s.shown);
+    var tripWord = s.trip === 'return' ? 'return' : 'one way';
+    var nonFactor = (c.m - 1).toFixed(1);
+    var routeText = hasVia
+      ? s.fromQ + ' → ' + viaName + ' → ' + s.toQ
+      : s.fromQ + (s.trip === 'return' ? ' ⇄ ' : ' → ') + s.toQ;
+
+    var ids = ['headline', 'range', 'swCo2', 'swDef', 'swHigh', 'bFuel', 'bProd', 'bNon', 'bLca', 'map', 'ctx', 'acft'];
+    var o = {};
+    var q = {};
+    ids.forEach(function (id) {
+      o[id] = s.pop === id;
+      q[id] = function () {
+        self.togglePop(id);
+      };
+    });
+
+    var hi = calc(s.cabin, 'high', s.trip, s.aircraft, hasVia).total;
+    var seg = function (v, color) {
+      return 'flex-basis: ' + (v / hi * 100).toFixed(2) + '%; background: ' + color;
+    };
+
+    var levers = [];
+    ['Y', 'W', 'J', 'F'].forEach(function (k) {
+      if (k === s.cabin) {
+        return;
+      }
+      var ratio = TIM[k] / TIM[s.cabin];
+      var more = RANK[k] > RANK[s.cabin];
+      levers.push({
+        id: 'cab' + k, name: CABIN[k] + ' class', pctNum: (ratio - 1) * 100, example: false,
+        text: 'A ' + CABIN[k].toLowerCase() + ' seat takes ' + (more ? 'more' : 'less') + ' cabin space than a ' + CABIN[s.cabin].toLowerCase() + ' seat, so it carries ' + (more ? 'more' : 'less') + ' of the flight’s emissions.',
+        derive: 'Google TIM, one way: ' + CABIN[k].toLowerCase() + ' ' + fmtInt(TIM[k]) + ' kg vs. ' + CABIN[s.cabin].toLowerCase() + ' ' + TIM[s.cabin] + ' kg (×' + ratio.toFixed(2) + ')',
+        source: 'Google TIM 2026',
+        go: function () {
+          self.setState({ cabin: k, pop: null });
+        },
+        goLabel: 'Switch to ' + CABIN[k].toLowerCase()
+      });
+    });
+    if (hasVia) {
+      levers.push({
+        id: 'conn', name: 'Fly direct (no stop)', pctNum: (1 / VIA_F - 1) * 100, example: true,
+        text: 'A direct flight avoids the extra distance and the extra take-off and landing, the most fuel-hungry part of a flight.',
+        derive: 'Example: removing the stop factor × ' + VIA_F.toFixed(2), source: 'example value',
+        go: function () {
+          self.setState({ via: null, viaOpen: false, pop: null });
+        },
+        goLabel: 'Remove the stop'
+      });
+    } else {
+      levers.push({
+        id: 'conn', name: 'One stop via Frankfurt', pctNum: (VIA_F - 1) * 100, example: true,
+        text: 'A stop adds distance and an extra take-off and landing, the most fuel-hungry part of a flight.',
+        derive: 'Example: extra distance and one extra landing cycle ≈ × ' + VIA_F.toFixed(2), source: 'example value',
+        go: function () {
+          self.setState({ via: 'Frankfurt (FRA)', pop: null });
+        },
+        goLabel: 'Add a stop in Frankfurt'
+      });
+    }
+    if (s.aircraft !== 'a339') {
+      levers.push({
+        id: 'lvAcft', name: 'Newest aircraft (A330-900neo)', pctNum: (AIRCRAFT.a339.f / acf.f - 1) * 100, example: true,
+        text: 'Newer aircraft burn less fuel per seat than older types.',
+        derive: 'Example: A330-900neo × ' + AIRCRAFT.a339.f.toFixed(2) + ' vs. ' + acf.name.toLowerCase() + ' × ' + acf.f.toFixed(2),
+        source: 'example value',
+        go: function () {
+          self.setState({ aircraft: 'a339', precise: true, pop: null });
+        },
+        goLabel: 'Switch to Airbus A330-900neo'
+      });
+    }
+    levers.sort(function (a, b) {
+      return Math.abs(b.pctNum) - Math.abs(a.pctNum);
+    });
+    var maxPct = Math.max.apply(null, levers.map(function (l) {
+      return Math.abs(l.pctNum);
+    }));
+    levers = levers.map(function (l) {
+      var res = fmtMass(c.total * (1 + l.pctNum / 100));
+      var toggle = function () {
+        self.togglePop(l.id);
+      };
+      return {
+        name: l.name, example: l.example, text: l.text, derive: l.derive, source: l.source,
+        value: res.num + ' ' + res.unit,
+        pct: fmtPct(l.pctNum), cls: l.pctNum > 0 ? 'is-up' : 'is-down',
+        miniStyle: 'width: ' + Math.max(6, Math.abs(l.pctNum) / maxPct * 100).toFixed(0) + '%' + (l.pctNum < 0 ? '; background: var(--rp-ok)' : ''),
+        open: s.pop === l.id, toggle: toggle,
+        go: l.go || toggle, goLabel: l.goLabel,
+        qLabel: 'How we know: ' + l.name.toLowerCase()
+      };
+    });
+
+    var oneWay = calc(s.cabin, s.mode, 'oneway', s.aircraft, hasVia);
+    var steps = [
+      { label: 'Great-circle distance Prague → New York JFK', src: 'OurAirports coordinates, haversine', val: '6,550 km' },
+      { label: 'Distance actually flown (+5% route correction)', src: 'ADS-B flight tracks (Teoh et al.), via Google TIM', val: '6,880 km' }
+    ];
+    if (hasVia) {
+      steps.push({ label: 'Stop in ' + viaName + ': extra distance and an extra take-off and landing', src: 'example factor × ' + VIA_F.toFixed(2), val: '+8%', example: true });
+    }
+    steps = steps.concat([
+      { label: 'Fuel: take-off and landing (fixed per flight, ' + (LTO_SHARE * 100).toFixed(0) + '% on this route)', src: 'EEA 2023 LTO cycle · split shown for a Boeing 787-9 profile', val: fmtInt(oneWay.fuelKg * LTO_SHARE) + ' kg', example: true },
+      { label: 'Fuel: climb, cruise and descent (by distance)', src: 'EEA 2023 CCD table, interpolated at 6,880 km', val: fmtInt(oneWay.fuelKg * (1 - LTO_SHARE)) + ' kg', example: true },
+      { label: 'Fuel per passenger, ' + CABIN[s.cabin].toLowerCase() + ', ' + (isMix ? 'typical aircraft mix' : acf.name), src: isMix ? 'EEA 2023 fuel model, via Google TIM 2026' : 'Google TIM 2026 × aircraft factor ' + acf.f.toFixed(2), val: fmtInt(oneWay.fuelKg) + ' kg', example: !isMix },
+      { label: 'CO2 from burning the fuel (× 3.19)', src: 'ISO 14083 heating value · CORSIA carbon intensity', val: fmtInt(oneWay.fuel) + ' kg' },
+      { label: 'Producing the fuel (× 0.65)', src: 'CORSIA life-cycle values', val: fmtInt(oneWay.prod) + ' kg' },
+      { label: s.mode === 'co2' ? 'High-altitude effects: not counted (CO2 only)' : 'High-altitude effects (× ' + nonFactor + ' of fuel CO2)', src: 'UK Government factors · Lee et al. 2021', val: fmtInt(oneWay.non) + ' kg' },
+      { label: 'One way', src: 'per passenger', val: fmtInt(oneWay.total) + ' kg', cls: 'is-total' }
+    ]);
+    if (s.trip === 'return') {
+      steps.push({ label: 'Return trip (× 2)', src: 'per passenger', val: fmtInt(c.total) + ' kg', cls: 'is-total' });
+    }
+    steps = steps.map(function (st, i) {
+      return { n: String(i + 1), label: st.label, src: st.src, val: st.val, cls: st.cls || '', example: !!st.example };
+    });
+
+    var crossOk = isMix && !hasVia;
+    var narrowShare = function () {
+      return window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+    };
+    var paxTotal = fmtMass(c.total * s.pax);
+    var viaPick = function (name) {
+      self.setState({ via: name, viaOpen: false });
+    };
+
+    return {
+      themeClass: isDark ? 'rp-dark' : '',
+      isDark: isDark,
+      isLight: !isDark,
+      themeLabel: isDark ? 'Switch to light theme' : 'Switch to dark theme',
+      toggleTheme: function () {
+        self.setState({ theme: isDark ? 'light' : 'dark' });
+      },
+      protoLabel: isLanding ? 'Prototype · landing page · mock data' : 'Prototype · planner page · mock data',
+      homeHref: isPlanner ? (p.landingHref || '#') : '#',
+      navClass: s.menu ? 'is-open' : '',
+      menu: s.menu,
+      toggleMenu: function () {
+        self.setState({ menu: !s.menu });
+      },
+      isPlanner: isPlanner,
+      isLanding: isLanding,
+      tripSectionStyle: isPlanner ? 'margin-top: 16px' : '',
+      showSummary: isPlanner && !s.editing,
+      showForm: isLanding || s.editing,
+      editTrip: function () {
+        self.setState({ editing: true });
+      },
+      routeText: routeText,
+      summaryMeta: (s.trip === 'return' ? 'Return' : 'One way') + ' · ' + CABIN[s.cabin] + ' · ' + (s.pax === 1 ? '1 passenger' : s.pax + ' passengers') + (isMix ? '' : ' · ' + acf.name),
+      ctaHref: isLanding ? (p.plannerHref || '#') : '#result',
+      ctaLabel: isPlanner ? 'Update' : 'See the impact',
+      ctaClick: function () {
+        if (isPlanner) {
+          self.setState({ editing: false });
+        }
+      },
+      onSubmit: function (e) {
+        e.preventDefault();
+      },
+      fromQ: s.fromQ, toQ: s.toQ,
+      fromOpen: s.fromOpen, toOpen: s.toOpen,
+      fromSug: this.suggestions(s.fromQ === 'Prague (PRG)' ? 'pra' : s.fromQ, 'from', function (name) {
+        self.setState({ fromQ: name, fromOpen: false });
+      }),
+      toSug: this.suggestions(s.toQ === 'New York (JFK)' ? 'new' : s.toQ, 'to', function (name) {
+        self.setState({ toQ: name, toOpen: false });
+      }),
+      onFrom: function (e) {
+        self.setState({ fromQ: e.target.value, fromOpen: true });
+      },
+      onTo: function (e) {
+        self.setState({ toQ: e.target.value, toOpen: true });
+      },
+      focusFrom: function () {
+        clearTimeout(self.blurTimer);
+        self.setState({ fromOpen: true, toOpen: false, viaOpen: false });
+      },
+      focusTo: function () {
+        clearTimeout(self.blurTimer);
+        self.setState({ toOpen: true, fromOpen: false, viaOpen: false });
+      },
+      blurFrom: function (e) {
+        self.blurField('from', e);
+      },
+      blurTo: function (e) {
+        self.blurField('to', e);
+      },
+      hasVia: hasVia,
+      noVia: !hasVia,
+      viaQ: s.via || '',
+      viaOpen: s.viaOpen,
+      viaSug: this.suggestions(s.via && s.via !== 'Frankfurt (FRA)' ? s.via : 'fra', 'via', viaPick),
+      addStop: function () {
+        self.setState({ via: '', viaOpen: true });
+      },
+      removeStop: function () {
+        self.setState({ via: null, viaOpen: false });
+      },
+      onVia: function (e) {
+        self.setState({ via: e.target.value, viaOpen: true });
+      },
+      focusVia: function () {
+        clearTimeout(self.blurTimer);
+        self.setState({ viaOpen: true, fromOpen: false, toOpen: false });
+      },
+      blurVia: function (e) {
+        self.blurField('via', e);
+      },
+      viaFra: hasVia && (s.via || '').indexOf('FRA') >= 0,
+      direct: !(hasVia && (s.via || '').indexOf('FRA') >= 0),
+      mapAria: hasVia ? 'Map: route from Prague to New York JFK with a stop in ' + viaName : 'Map: great-circle route from Prague to New York JFK',
+      distanceText: hasVia ? 'Direct: 6,550 km great-circle · the stop adds distance (example +8% in total)' : '6,550 km great-circle · about 6,880 km flown',
+      toErr: !!p.showError && s.toQ === 'XYZ',
+      toErrClass: p.showError && s.toQ === 'XYZ' ? 'is-error' : '',
+      tripReturn: s.trip === 'return', tripOneway: s.trip === 'oneway',
+      setReturn: function () {
+        self.setState({ trip: 'return' });
+      },
+      setOneway: function () {
+        self.setState({ trip: 'oneway' });
+      },
+      precise: s.precise,
+      preciseLabel: s.precise ? 'Hide aircraft' : 'More precise: choose aircraft',
+      togglePrecise: function () {
+        self.setState({ precise: !s.precise });
+      },
+      aircraft: s.aircraft,
+      acftName: acf.name,
+      acftFactor: acf.f.toFixed(2),
+      onAircraft: function (e) {
+        self.setState({ aircraft: e.target.value });
+      },
+      precisionNote: (isMix
+        ? 'Aircraft: typical mix on this route. Choose an aircraft under “More precise” for a more precise number.'
+        : 'Aircraft: ' + acf.name + ' (example values). Change it under “More precise”.')
+        + (hasVia ? ' The stop uses an example factor.' : ''),
+      cabin: s.cabin,
+      onCabin: function (e) {
+        self.setState({ cabin: e.target.value });
+      },
+      paxStr: String(s.pax),
+      onPax: function (e) {
+        self.setState({ pax: parseInt(e.target.value, 10) || 1 });
+      },
+      showOldNotice: !!p.sharedOld && !s.oldDismissed,
+      dismissOld: function () {
+        self.setState({ oldDismissed: true });
+      },
+      tripWord: tripWord,
+      cabinName: CABIN[s.cabin],
+      pax: s.pax,
+      paxLabel: s.pax === 1 ? '1 passenger' : s.pax + ' passengers',
+      showPaxTotal: s.pax > 1,
+      paxTotal: paxTotal.num + ' ' + paxTotal.unit,
+      headNum: head.num, headUnit: head.unit,
+      rangeText: fmtT(c.lo) + ' – ' + fmtT(c.hi) + ' t',
+      o: o, q: q,
+      sw: {
+        co2: s.mode === 'co2', def: s.mode === 'def', high: s.mode === 'high',
+        co2Cls: s.mode === 'co2' ? 'is-on' : '', defCls: s.mode === 'def' ? 'is-on' : '', highCls: s.mode === 'high' ? 'is-on' : ''
+      },
+      setCo2: function () {
+        self.setState({ mode: 'co2' });
+      },
+      setDef: function () {
+        self.setState({ mode: 'def' });
+      },
+      setHigh: function () {
+        self.setState({ mode: 'high' });
+      },
+      d: {
+        fuel: fmtInt(c.fuel), prod: fmtInt(c.prod), non: fmtInt(c.non), total: fmtInt(c.total),
+        fuelKg: fmtInt(c.fuelKg), nonFactor: nonFactor,
+        nonSentence: s.mode === 'co2' ? 'With “CO2 only” selected they are not counted.' : 'We count them as ' + nonFactor + '× the CO2 from burned fuel.',
+        checkHead: crossOk
+          ? 'Cross-check: Google TIM fuel-related part ' + fmtInt(TIM[s.cabin] * c.mul) + ' kg, ours ' + fmtInt(c.fuel + c.prod) + ' kg — matches'
+          : 'No independent cross-check for this choice yet (example values)',
+        checkExplain: crossOk
+          ? 'Cross-check: Google TIM 2026 gives ' + TIM[s.cabin] + ' kg for fuel-related emissions one way; ours ' + fmtInt(oneWay.fuel + oneWay.prod) + ' kg — matches.'
+          : 'No independent cross-check yet: Google TIM covers the direct route with the typical aircraft mix only.',
+        lo: fmtT(c.lo) + ' t', mid: fmtT(c.mid) + ' t', hi: fmtT(c.hi) + ' t'
+      },
+      bar: {
+        fuel: seg(c.fuel, 'var(--rp-cat-1)'),
+        prod: seg(c.prod, 'var(--rp-cat-2)'),
+        non: seg(c.non, 'var(--rp-cat-3)')
+      },
+      barAria: 'Fuel burned ' + fmtInt(c.fuel) + ' kg, fuel production ' + fmtInt(c.prod) + ' kg, high-altitude effects ' + fmtInt(c.non) + ' kg',
+      explain: s.explain,
+      explainLabel: s.explain ? 'Hide calculation' : 'How is this calculated?',
+      toggleExplain: function () {
+        self.setState({ explain: !s.explain });
+      },
+      openExplain: function () {
+        self.setState({ explain: true, pop: null });
+      },
+      steps: steps,
+      levers: levers,
+      mapReady: s.mapReady,
+      mapLoading: !s.mapReady,
+      toastOn: !!s.toast,
+      toast: s.toast || '',
+      share: function () {
+        var msg = narrowShare() ? 'Opening share sheet…' : 'Link copied';
+        clearTimeout(self.toastTimer);
+        self.setState({ toast: msg });
+        self.toastTimer = setTimeout(function () {
+          self.setState({ toast: null });
+        }, 2000);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

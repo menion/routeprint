@@ -1,0 +1,34 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-14T10:00:00Z" },
+  "title": "Routeprint prototype",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 900, "title": "Landing · Desktop · Light", "expand": "fill", "is_interactive": true },
+    "B-Planner-Desktop-Light.dc.html": { "x": 1360, "y": 0, "w": 1280, "h": 1500, "title": "Planner · Desktop · Light", "expand": "fill", "is_interactive": true },
+    "B-Landing-Mobile-Light.dc.html": { "x": 2720, "y": 0, "w": 375, "h": 1400, "title": "Landing · Mobile · Light", "is_interactive": true },
+    "B-Planner-Mobile-Light.dc.html": { "x": 3175, "y": 0, "w": 375, "h": 2400, "title": "Planner · Mobile · Light", "is_interactive": true },
+    "B-Landing-Desktop-Dark.dc.html": { "x": 0, "y": 2800, "w": 1280, "h": 900, "title": "Landing · Desktop · Dark", "expand": "fill", "is_interactive": true },
+    "B-Planner-Desktop-Dark.dc.html": { "x": 1360, "y": 2800, "w": 1280, "h": 1500, "title": "Planner · Desktop · Dark", "expand": "fill", "is_interactive": true },
+    "B-Landing-Mobile-Dark.dc.html": { "x": 2720, "y": 2800, "w": 375, "h": 1400, "title": "Landing · Mobile · Dark", "is_interactive": true },
+    "B-Planner-Mobile-Dark.dc.html": { "x": 3175, "y": 2800, "w": 375, "h": 2400, "title": "Planner · Mobile · Dark", "is_interactive": true }
+  },
+  "order": [
+    "Main.dc.html",
+    "B-Planner-Desktop-Light.dc.html",
+    "B-Landing-Mobile-Light.dc.html",
+    "B-Planner-Mobile-Light.dc.html",
+    "B-Landing-Desktop-Dark.dc.html",
+    "B-Planner-Desktop-Dark.dc.html",
+    "B-Landing-Mobile-Dark.dc.html",
+    "B-Planner-Mobile-Dark.dc.html"
+  ],
+  "notes": {
+    "titleLight": { "x": 0, "y": -300, "text": "Landing page + separate planner — light theme", "kind": "title1", "maxW": 3550 },
+    "titleDark": { "x": 0, "y": 2500, "text": "Landing page + separate planner — dark theme", "kind": "title1", "maxW": 3550 },
+    "howto": { "x": 3700, "y": 0, "w": 420, "size": "m", "fill": "blue", "text": "How to use this prototype\n\n• Press Play on any artboard: the switch, trip type, cabin, aircraft, + Add stop, ? popovers, Share, theme switch and the calculation view all work.\n• \"See the impact\" on a landing page opens the matching planner; the logo leads back. On the planner, \"Edit trip\" opens the full form.\n• Tweaks on Main: page, theme, shared-old-link notice, unknown-airport error state, calculation view open.\n\nMock data: Prague ⇄ New York JFK. Per-class figures from Google TIM (one way: economy 417.5, premium 579.6, business 1,434.2, first 1,763.9 kg). The stop factor and per-aircraft values are marked as examples." },
+    "decide": { "x": 3700, "y": 860, "w": 420, "size": "m", "fill": "green", "text": "Decision D6 (2026-11-14): landing page + separate planner.\n\nThe user is not overwhelmed at the start; the landing stays fast and map-free; the planner page is the share target." }
+  },
+  "designSystems": []
+}

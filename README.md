@@ -20,6 +20,7 @@ the calculation. No offsets, no affiliate links.
 | [Architecture](docs/architecture.md) | Engine, methodology as data, reference data, growth path, decisions |
 | [Design](docs/design.md) | Audience, principles, core flow, explain view, open design questions |
 | [Prototype prompt](docs/prototype-prompt.md) | Brief for a design tool to produce the first clickable UI prototype |
+| [Prototype](prototype/README.md) | Source of the clickable UI prototype: design tokens, components, mock interactions |
 
 ## Licence
 
